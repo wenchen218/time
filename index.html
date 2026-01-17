@@ -8,7 +8,9 @@
         :root {
             --bg-color: #1a1a1a;
             --text-color: #ffffff;
-            --accent-color: #4CAF50; /* 考試進行中的顏色 */
+            /* 將強調色定義為 RGB 格式，方便製作半透明光暈 (對應 #4CAF50) */
+            --accent-rgb: 76, 175, 80; 
+            --accent-color: rgb(var(--accent-rgb));
             --sidebar-bg: #2d2d2d;
             --sidebar-width: 350px;
         }
@@ -32,13 +34,15 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            z-index: 1; /* 確保時鐘在最底層 */
         }
 
         #clock-time {
-            font-size: 12rem; /* 超大時間字體 */
+            font-size: 12rem;
             font-weight: bold;
-            font-variant-numeric: tabular-nums; /* 防止數字跳動 */
+            font-variant-numeric: tabular-nums;
             line-height: 1;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         #clock-date {
@@ -56,6 +60,8 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            z-index: 2; /* 側邊欄層級較高 */
+            position: relative;
         }
 
         h2 {
@@ -64,23 +70,41 @@
             padding-bottom: 10px;
         }
 
+        /* 考試項目的基礎樣式 */
         .exam-item {
             background: #3d3d3d;
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem; /* 增加一點間距，避免放大時太擠 */
             padding: 1.5rem;
-            border-radius: 8px;
+            border-radius: 12px; /* 圓角稍微大一點 */
             border-left: 5px solid transparent;
-            transition: transform 0.2s;
+            /* 修改為 transition: all，讓陰影和背景色的變化也有動畫 */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
         }
 
+        /* --- 重點修改區域：目前進行中的考試 --- */
         .exam-item.active {
             border-left: 5px solid var(--accent-color);
-            background: #2e3b2f;
-            transform: scale(1.02);
+            background: #3a4b3b; /* 稍微亮一點的綠色背景 */
+            color: #fff;
+            
+            /* 1. 放大效果：放大 1.08 倍 */
+            transform: scale(1.08); 
+            /* 確保放大的元素壓在其他元素上面 */
+            z-index: 10; 
+            
+            /* 2. 整圈光環效果：使用多層陰影疊加出強烈的發光感 */
+            box-shadow: 
+                0 0 15px rgba(var(--accent-rgb), 0.6), /* 內層亮光 */
+                0 0 30px rgba(var(--accent-rgb), 0.4), /* 中層柔光 */
+                0 0 50px rgba(var(--accent-rgb), 0.2); /* 外層大範圍暈光 */
         }
+        /* ------------------------------------- */
 
         .exam-item.past {
-            opacity: 0.5;
+            opacity: 0.4;
+            background: #333;
+            transform: scale(0.98); /* 過去的稍微縮小一點點 */
         }
 
         .exam-time {
@@ -89,23 +113,34 @@
             margin-bottom: 0.5rem;
             font-weight: bold;
         }
+        
+        /* 讓進行中的考試時間顏色更亮 */
+        .exam-item.active .exam-time {
+            color: var(--accent-color);
+        }
 
         .exam-subject {
             font-size: 1.5rem;
             font-weight: bold;
         }
 
-        /* 響應式：手機版改為上下排列 */
+        /* 響應式：手機版 */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
             }
             #schedule-sidebar {
                 width: 100%;
-                height: 40%;
+                height: 45%; /* 稍微增加高度給放大的元素空間 */
+                padding: 1.5rem;
+                box-sizing: border-box;
             }
             #clock-time {
                 font-size: 5rem;
+            }
+            /* 手機版放大比例稍微小一點，避免超出螢幕 */
+            .exam-item.active {
+                transform: scale(1.05); 
             }
         }
     </style>
